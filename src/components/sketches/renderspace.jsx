@@ -12,23 +12,23 @@ class RenderSpace extends Component {
     p.res = 30;
     p.rotationAmount = 360;
     p.drawspaceSizes = this.props.canvasSizes[0];
-    p.vertexArray = [];
+    p.vertexArrayA = [];
 
     p.setup = (array) => {
       p.threeDCanvas = p.createCanvas(
-        this.props.canvasSizes[0].x * 0.9,
-        this.props.canvasSizes[0].y * 0.4,
+        this.props.canvasSizes[0].x,
+        this.props.canvasSizes[0].y * 0.9,
         p.WEBGL
       );
     };
 
     p.draw = () => {
-      p.shapeArray = this.props.shapeArray;
+      p.shapeArrayA = this.props.renderArrayA;
+      p.shapeArrayB = this.props.renderArrayB;
       if (this.props.stuff_drawn_binary) {
         p.orbitControl(10, 10, 0.1);
       }
       p.clear();
-      p.orbitControl(10, 10, 0.1);
 
       p.angleMode(p.DEGREES);
 
@@ -42,8 +42,6 @@ class RenderSpace extends Component {
       // p.rotationAmount = document.getElementById("rotationSlider").value;
       // p.res = document.getElementById("resolutionSlider").value;
 
-      p.stroke(200);
-      p.strokeWeight(0.1);
       p.ambientLight(170);
 
       // p.materialColor = p.color(135, 132, 179);
@@ -58,36 +56,8 @@ class RenderSpace extends Component {
       //   { rho: 15, y: -40 },
       //   { rho: 16, y: -45 },
       // ];
-      // for (let phi = 0; phi < 360; phi += p.res) {
-      //   p.ambientMaterial(p.materialColor);
-      //   for (let j = 0; j < p.temp.length - 1; j++) {
-      //     p.beginShape();
-      //     p.vertex(
-      //       p.temp[j].rho * p.cos(phi),
-      //       p.temp[j].y,
-      //       p.temp[j].rho * p.sin(phi)
-      //     );
-      //     p.vertex(
-      //       p.temp[j].rho * p.cos(phi + p.res),
-      //       p.temp[j].y,
-      //       p.temp[j].rho * p.sin(phi + p.res)
-      //     );
-      //     p.vertex(
-      //       p.temp[j + 1].rho * p.cos(phi + p.res),
-      //       p.temp[j + 1].y,
-      //       p.temp[j + 1].rho * p.sin(phi + p.res)
-      //     );
-      //     p.vertex(
-      //       p.temp[j + 1].rho * p.cos(phi),
-      //       p.temp[j + 1].y,
-      //       p.temp[j + 1].rho * p.sin(phi)
-      //     );
-      //     p.endShape(p.CLOSE);
-      //   }
-      // }
 
-      p.yAvg = p.findYCenter();
-      // p.drawSpaceWidth = this.props.canvasSizes[0].x * 0.4;
+      p.yAvg = (this.props.topAvg.y + this.props.bottomAvg.y) / 2;
 
       if (this.props.stuff_drawn_binary) {
         //checks if rendering is on
@@ -97,60 +67,134 @@ class RenderSpace extends Component {
 
     p.vert = function (shape) {
       this.y = shape.y;
-      this.rho = (p.drawspaceSizes.x * 0.4) / 2 - shape.x; //rho = distance from the center
+      // this.rho = (p.drawspaceSizes.x * 0.4) / 2 - shape.x; //rho = distance from the center
+      this.rho = shape.rho;
     };
 
     p.updateRender = function () {
-      for (let i = 0; i < p.shapeArray.length; i++) {
-        const newVert = new p.vert(p.shapeArray[i]);
-        p.vertexArray.push(newVert);
-      }
+      p.vertexArrayArray = [];
+      // for (let arrayNum = 0; arrayNum < 2; arrayNum++) {
+      //   p.vertexArrayArray[arrayNum] = new p.vertexArray();
+      // }
+      p.vertexArrayArray.push(new p.vertexArray("A", p.shapeArrayA));
+      p.vertexArrayArray.push(new p.vertexArray("B", p.shapeArrayB));
+      p.ambientMaterial(p.materialColor);
 
-      for (let phi = 0; phi < p.rotationAmount; phi += p.res) {
-        p.ambientMaterial(p.materialColor);
-        for (let j = 0; j < p.vertexArray.length - 1; j++) {
-          p.beginShape();
-          p.vertex(
-            p.vertexArray[j].rho * p.cos(phi),
-            p.vertexArray[j].y,
-            p.vertexArray[j].rho * p.sin(phi)
-          );
-          p.vertex(
-            p.vertexArray[j].rho * p.cos(phi + p.res),
-            p.vertexArray[j].y,
-            p.vertexArray[j].rho * p.sin(phi + p.res)
-          );
-          p.vertex(
-            p.vertexArray[j + 1].rho * p.cos(phi + p.res),
-            p.vertexArray[j + 1].y,
-            p.vertexArray[j + 1].rho * p.sin(phi + p.res)
-          );
-          p.vertex(
-            p.vertexArray[j + 1].rho * p.cos(phi),
-            p.vertexArray[j + 1].y,
-            p.vertexArray[j + 1].rho * p.sin(phi)
-          );
-          p.endShape(p.CLOSE);
-        }
+      for (let phi = 0; phi < 180 - p.res; phi += p.res) {
+        p.vertexArrayArray[0].regularCurveRun(phi);
       }
-      p.vertexArray = [];
+      p.noStroke();
+      p.seamRun(
+        180 - p.res,
+        p.vertexArrayArray[0].array,
+        p.vertexArrayArray[1].array
+      );
+      // p.stroke(200);
+      for (let phi = 180; phi < 360 - p.res; phi += p.res) {
+        p.vertexArrayArray[1].regularCurveRun(phi);
+      }
+      p.seamRun(
+        360 - p.res,
+        p.vertexArrayArray[1].array,
+        p.vertexArrayArray[0].array
+      );
+      // p.stroke(200);
+
+      // for (
+      //   let arrayIndex = 0;
+      //   arrayIndex < p.vertexArrayArray.length;
+      //   arrayIndex++
+      // ) {
+      //   var lastPhi = 0;
+      //   for (let phi = 0; phi < 360 / p.vertexArrayArray.length; phi += p.res) {
+      //     p.vertexArrayArray[arrayIndex].regularCurveRun(phi + lastPhi);
+      //     lastPhi = phi;
+      //   }
+      // }
+
+      //fix this looping-erasing nonsense
+      p.vertexArrayArray = [];
     };
 
-    //--------Find Y-Center Function---------
-    p.findYCenter = function () {
-      p.topCoord = p.drawspaceSizes.y * 0.28; //***height of drawSpace***
-      p.bottomCoord = 0;
-      //check y coordinate for each & replace topCoord & bottomCoord variables
-      if (p.stuff_drawn_binary) {
-        for (let i = 0; i < p.shapeArray.length; i++) {
-          if (p.shapeArray[i].y < p.topCoord) {
-            p.topCoord = p.shapeArray[i].y;
-          }
-          if (p.shapeArray[i].y > p.bottomCoord) {
-            p.bottomCoord = p.shapeArray[i].y;
-          }
+    p.vertexArray = function (id, shapeArray) {
+      this.id = id;
+      this.shapeArray = shapeArray;
+      this.array = [];
+      for (let i = 0; i < this.shapeArray.length; i++) {
+        const newVert = new p.vert(this.shapeArray[i]);
+        this.array.push(newVert);
+      }
+    };
+    p.vertexArray.prototype.regularCurveRun = function (phi) {
+      for (let j = 0; j < this.array.length - 1; j++) {
+        p.beginShape();
+        p.vertex(
+          this.array[j].rho * p.cos(phi),
+          this.array[j].y - p.yAvg,
+          this.array[j].rho * p.sin(phi)
+        );
+        p.vertex(
+          this.array[j].rho * p.cos(phi + p.res),
+          this.array[j].y - p.yAvg,
+          this.array[j].rho * p.sin(phi + p.res)
+        );
+        p.vertex(
+          this.array[j + 1].rho * p.cos(phi + p.res),
+          this.array[j + 1].y - p.yAvg,
+          this.array[j + 1].rho * p.sin(phi + p.res)
+        );
+        p.vertex(
+          this.array[j + 1].rho * p.cos(phi),
+          this.array[j + 1].y - p.yAvg,
+          this.array[j + 1].rho * p.sin(phi)
+        );
+        p.endShape(p.CLOSE);
+      }
+    };
+
+    p.seamRun = function (phi, arrayA, arrayB) {
+      p.beginShape();
+      // p.vertex(
+      //   arrayA[1].rho * p.cos(phi),
+      //   arrayA[0].y - p.yAvg,
+      //   arrayA[].rho * p.sin(phi)
+      // );
+      // p.vertex(
+      //   arrayB[0].rho * p.cos(phi),
+      //   arrayB[0].y - p.yAvg,
+      //   arrayB[0].rho * p.sin(phi)
+      // );
+      // p.vertex(
+      //   arrayA[1].rho * p.cos(phi),
+      //   arrayA[1].y - p.yAvg,
+      //   arrayA[1].rho * p.sin(phi)
+      // );
+      p.endShape(p.CLOSE);
+      for (let j = 0; j < arrayA.length - 1; j++) {
+        const topBound = arrayA[j].y;
+        const bottomBound = arrayA[j + 1].y;
+        const middleVals = (arr) => topBound < arr.y < bottomBound;
+        var tempBArray = arrayB.filter(middleVals);
+        p.beginShape();
+        p.vertex(
+          arrayA[j].rho * p.cos(phi),
+          arrayA[j].y - p.yAvg,
+          arrayA[j].rho * p.sin(phi)
+        );
+
+        for (let i = 0; i < tempBArray.length - 1; i++) {
+          p.vertex(
+            tempBArray[i].rho * p.cos(phi + p.res),
+            tempBArray[i].y - p.yAvg,
+            tempBArray[i].rho * p.sin(phi + p.res)
+          );
         }
-        return (p.topCoord + p.bottomCoord) / 2;
+        p.vertex(
+          arrayA[j + 1].rho * p.cos(phi),
+          arrayA[j + 1].y - p.yAvg,
+          arrayA[j + 1].rho * p.sin(phi)
+        );
+        p.endShape(p.CLOSE);
       }
     };
   };

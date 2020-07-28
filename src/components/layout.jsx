@@ -1,9 +1,14 @@
 import React from "react";
+// import DrawSpaceContainer from "./drawspacecontainer";
+import Navbar from "./navbar";
 
 const Layout = (props) => {
   return (
-    <div className="h-screen w-screen grid grid-cols-4 grid-rows-flow">
-      {props.children}
+    <div className="">
+      <Navbar />
+      <div className="h-screen w-screen grid grid-cols-4 grid-rows-3">
+        {props.children}
+      </div>
     </div>
   );
 };

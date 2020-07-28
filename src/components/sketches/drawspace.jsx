@@ -9,31 +9,26 @@ class DrawSpace extends Component {
 
   Sketch = (p) => {
     p.shapeArray = [];
+    p.windowResized = () => {
+      p.resizeCanvas(this.props.canvasSizes[0].x, this.props.canvasSizes[0].y);
+    };
 
     p.setup = () => {
       p.canvas = p.createCanvas(
-        this.props.canvasSizes[0].x * 0.4,
-        this.props.canvasSizes[0].y * 0.28,
+        this.props.canvasSizes[0].x,
+        this.props.canvasSizes[0].y,
         p.SVG
       );
     };
 
     p.draw = () => {
       p.mode = this.props.currentMode;
-      p.background(249);
+      p.background(255);
       if (this.props.clearBinary) {
         p.onDelete();
         this.props.finishedClearing();
       }
-      //   if (p.shapeArray.length < 12) {
-      //     document.getElementById("numVerticeSlider").max =
-      //       p.shapeArray.length * 0.4;
-      //   } else {
-      //     document.getElementById("numVerticeSlider").max =
-      //       p.shapeArray.length * 0.25;
-      //   }
 
-      //   p.numVertices = document.getElementById("numVerticeSlider").value;
       p.numVertices = p.shapeArray.length * 0.15;
       p.cleanShapeArray();
       p.shapesToVertices();
@@ -69,9 +64,18 @@ class DrawSpace extends Component {
           }
         }
       }
+      p.stroke(10);
+      p.line(
+        this.props.topAvg.x,
+        this.props.topAvg.y,
+        this.props.bottomAvg.x,
+        this.props.bottomAvg.y
+      );
+      p.noStroke();
 
       p.fill(0);
       p.noStroke();
+
       if (p.shapeArray.length > 0) {
         this.props.onShapeArrayExport(p.vertShapeArray, 1);
       } else {
@@ -111,7 +115,7 @@ class DrawSpace extends Component {
 
     //----------shape creation & showing--------
     //shape constructor function
-    p.shape = function (mirrorBool = 0) {
+    p.shape = function () {
       this.x = p.mouseX;
       this.y = p.mouseY;
       this.thickness = 16;
