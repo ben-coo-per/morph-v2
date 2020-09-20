@@ -1,0 +1,8 @@
+{
+  "forms": {
+    "contactForm": {
+      "name": "Contact Form",
+      "actions": [{ "type": "email", "to": "{cooperben83@gmail.com}" }]
+    }
+  }
+}

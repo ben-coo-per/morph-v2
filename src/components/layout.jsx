@@ -1,5 +1,4 @@
 import React from "react";
-// import DrawSpaceContainer from "./drawspacecontainer";
 import Navbar from "./navbar";
 
 const Layout = (props) => {

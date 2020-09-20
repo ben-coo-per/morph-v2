@@ -13,6 +13,7 @@ class RenderSpace extends Component {
     p.rotationAmount = 360;
     p.drawspaceSizes = this.props.canvasSizes[0];
     p.vertexArrayA = [];
+    p.rotateBool = 1; //1=rotate, 0=dont
 
     p.setup = (array) => {
       p.threeDCanvas = p.createCanvas(
@@ -45,6 +46,9 @@ class RenderSpace extends Component {
       p.ambientLight(170);
 
       // p.materialColor = p.color(135, 132, 179);
+      if ((p.rotateBool = 1)) {
+        p.rotateY(p.millis() / 50);
+      }
       p.materialColor = p.color(200);
       p.pointLight(90, 80, 100, 0, 100, 0);
 
@@ -83,6 +87,7 @@ class RenderSpace extends Component {
       for (let phi = 0; phi < 180 - p.res; phi += p.res) {
         p.vertexArrayArray[0].regularCurveRun(phi);
       }
+      // p.ambientMaterial(p.color(135, 132, 179));
       p.noStroke();
       p.seamRun(
         180 - p.res,
@@ -90,27 +95,16 @@ class RenderSpace extends Component {
         p.vertexArrayArray[1].array
       );
       // p.stroke(200);
+      // p.ambientMaterial(p.color(0, 255, 0));
       for (let phi = 180; phi < 360 - p.res; phi += p.res) {
         p.vertexArrayArray[1].regularCurveRun(phi);
       }
+      // p.ambientMaterial(p.color(255, 0, 0));
       p.seamRun(
         360 - p.res,
         p.vertexArrayArray[1].array,
         p.vertexArrayArray[0].array
       );
-      // p.stroke(200);
-
-      // for (
-      //   let arrayIndex = 0;
-      //   arrayIndex < p.vertexArrayArray.length;
-      //   arrayIndex++
-      // ) {
-      //   var lastPhi = 0;
-      //   for (let phi = 0; phi < 360 / p.vertexArrayArray.length; phi += p.res) {
-      //     p.vertexArrayArray[arrayIndex].regularCurveRun(phi + lastPhi);
-      //     lastPhi = phi;
-      //   }
-      // }
 
       //fix this looping-erasing nonsense
       p.vertexArrayArray = [];
@@ -153,48 +147,61 @@ class RenderSpace extends Component {
     };
 
     p.seamRun = function (phi, arrayA, arrayB) {
-      p.beginShape();
-      // p.vertex(
-      //   arrayA[1].rho * p.cos(phi),
-      //   arrayA[0].y - p.yAvg,
-      //   arrayA[].rho * p.sin(phi)
-      // );
-      // p.vertex(
-      //   arrayB[0].rho * p.cos(phi),
-      //   arrayB[0].y - p.yAvg,
-      //   arrayB[0].rho * p.sin(phi)
-      // );
-      // p.vertex(
-      //   arrayA[1].rho * p.cos(phi),
-      //   arrayA[1].y - p.yAvg,
-      //   arrayA[1].rho * p.sin(phi)
-      // );
-      p.endShape(p.CLOSE);
-      for (let j = 0; j < arrayA.length - 1; j++) {
-        const topBound = arrayA[j].y;
-        const bottomBound = arrayA[j + 1].y;
-        const middleVals = (arr) => topBound < arr.y < bottomBound;
-        var tempBArray = arrayB.filter(middleVals);
+      if (arrayA[1]) {
         p.beginShape();
         p.vertex(
-          arrayA[j].rho * p.cos(phi),
-          arrayA[j].y - p.yAvg,
-          arrayA[j].rho * p.sin(phi)
+          arrayA[0].rho * p.cos(phi),
+          arrayA[0].y - p.yAvg,
+          arrayA[0].rho * p.sin(phi)
         );
-
-        for (let i = 0; i < tempBArray.length - 1; i++) {
-          p.vertex(
-            tempBArray[i].rho * p.cos(phi + p.res),
-            tempBArray[i].y - p.yAvg,
-            tempBArray[i].rho * p.sin(phi + p.res)
-          );
-        }
         p.vertex(
-          arrayA[j + 1].rho * p.cos(phi),
-          arrayA[j + 1].y - p.yAvg,
-          arrayA[j + 1].rho * p.sin(phi)
+          arrayB[0].rho * p.cos(phi + p.res),
+          arrayB[0].y - p.yAvg,
+          arrayB[0].rho * p.sin(phi + p.res)
+        );
+        p.vertex(
+          arrayA[1].rho * p.cos(phi),
+          arrayA[1].y - p.yAvg,
+          arrayA[1].rho * p.sin(phi)
+        );
+        p.vertex(
+          arrayB[1].rho * p.cos(phi + p.res),
+          arrayB[1].y - p.yAvg,
+          arrayB[1].rho * p.sin(phi + p.res)
         );
         p.endShape(p.CLOSE);
+      }
+
+      for (let j = 1; j < arrayA.length - 1; j++) {
+        const middleVals = (arr) =>
+          arr.y >= arrayA[j].y - 0.3 * p.yAvg &&
+          arr.y <= arrayA[j + 1].y + 0.3 * p.yAvg;
+        // if (arrayB[0].y > arrayA[0].y) {
+
+        var tempBArray = arrayB.filter(middleVals);
+
+        if (arrayA[j].rho > 0) {
+          p.beginShape();
+          p.vertex(
+            arrayA[j].rho * p.cos(phi),
+            arrayA[j].y - p.yAvg,
+            arrayA[j].rho * p.sin(phi)
+          );
+
+          for (let i = 0; i < tempBArray.length; i++) {
+            p.vertex(
+              tempBArray[i].rho * p.cos(phi + p.res),
+              tempBArray[i].y - p.yAvg,
+              tempBArray[i].rho * p.sin(phi + p.res)
+            );
+          }
+          p.vertex(
+            arrayA[j + 1].rho * p.cos(phi),
+            arrayA[j + 1].y - p.yAvg,
+            arrayA[j + 1].rho * p.sin(phi)
+          );
+          p.endShape();
+        }
       }
     };
   };

@@ -9,6 +9,7 @@ class DrawSpace extends Component {
 
   Sketch = (p) => {
     p.shapeArray = [];
+
     p.windowResized = () => {
       p.resizeCanvas(this.props.canvasSizes[0].x, this.props.canvasSizes[0].y);
     };
@@ -45,7 +46,7 @@ class DrawSpace extends Component {
       } else if (p.mode === "findCenter") {
         //Unused at the moment
       } else if (p.mode === "vertex") {
-        p.background(249);
+        p.background(255);
         p.stroke(1);
         for (let i = 0; i < p.vertShapeArray.length; i++) {
           if (i === 0) {
@@ -64,14 +65,14 @@ class DrawSpace extends Component {
           }
         }
       }
-      p.stroke(10);
-      p.line(
-        this.props.topAvg.x,
-        this.props.topAvg.y,
-        this.props.bottomAvg.x,
-        this.props.bottomAvg.y
-      );
-      p.noStroke();
+      // p.stroke(10);
+      // p.line(
+      //   this.props.topAvg.x,
+      //   this.props.topAvg.y,
+      //   this.props.bottomAvg.x,
+      //   this.props.bottomAvg.y
+      // );
+      // p.noStroke();
 
       p.fill(0);
       p.noStroke();
@@ -148,9 +149,9 @@ class DrawSpace extends Component {
       } else {
         p.fill(this.baseColor);
       }
-      p.stroke(1);
-      p.line(lastVertX, lastVertY, this.x, this.y);
-      p.noStroke();
+      // p.stroke(1);
+      // p.line(lastVertX, lastVertY, this.x, this.y);
+      // p.noStroke();
       p.ellipse(this.x, this.y, this.thickness);
     };
 
@@ -178,7 +179,7 @@ class DrawSpace extends Component {
     //--------Button Functions----------
     p.onDelete = function () {
       p.justCleared = p.shapeArray.splice(0, p.shapeArray.length); //just in case you want to impliment short-term memory
-      p.background(p.color(249));
+      p.background(p.color(255));
     };
 
     // p.backButton = function () {
